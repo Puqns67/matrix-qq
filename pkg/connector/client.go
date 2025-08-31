@@ -8,9 +8,10 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/duo/matrix-qq/pkg/qqid"
-	"maunium.net/go/mautrix/bridge/status"
+
 	"maunium.net/go/mautrix/bridgev2"
 	"maunium.net/go/mautrix/bridgev2/networkid"
+	"maunium.net/go/mautrix/bridgev2/status"
 )
 
 type resyncQueueItem struct {

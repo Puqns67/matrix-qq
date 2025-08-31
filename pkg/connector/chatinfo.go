@@ -3,6 +3,7 @@ package connector
 import (
 	"cmp"
 	"context"
+	"errors"
 	"fmt"
 	"math/rand/v2"
 	"net/url"
@@ -144,9 +145,10 @@ func (qc *QQClient) getGroupChatInfo(_ context.Context, portal *bridgev2.Portal)
 	for _, m := range membersInfo {
 		evtSender := qc.makeEventSender(fmt.Sprint(m.Uin))
 		pl := powerDefault
-		if m.Permission == entity.Owner {
+		switch m.Permission {
+		case entity.Owner:
 			pl = powerSuperAdmin
-		} else if m.Permission == entity.Admin {
+		case entity.Admin:
 			pl = powerAdmin
 		}
 
@@ -327,7 +329,11 @@ func (qc *QQClient) updateMemberDisplyname(ctx context.Context, portal *bridgev2
 	groupID, _ := strconv.ParseUint(string(portal.ID), 10, 32)
 	if members := qc.Client.GetCachedMembersInfo(uint32(groupID)); members != nil {
 		for _, member := range members {
-			memberIntent := portal.GetIntentFor(ctx, qc.makeEventSender(fmt.Sprint(member.Uin)), qc.UserLogin, bridgev2.RemoteEventChatInfoChange)
+			memberIntent, _ := portal.GetIntentFor(ctx, qc.makeEventSender(fmt.Sprint(member.Uin)), qc.UserLogin, bridgev2.RemoteEventChatInfoChange)
+			if memberIntent == nil {
+				zerolog.Ctx(ctx).Err(errors.New("err")).Msg("Failed to get intent")
+				continue
+			}
 
 			mxid := memberIntent.GetMXID()
 
